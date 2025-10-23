@@ -2,7 +2,6 @@ package com.linkTIC.products.adapters.outbound.persistence;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -23,8 +22,7 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     private Product toDomain(ProductEntity e) { 
-    	UUID newUUID = null;
-    	return new Product(newUUID, e.getNombre(), e.getPrecio(), e.getDescripcion());
+    	return new Product(e.getId(), e.getNombre(), e.getPrecio(), e.getDescripcion());
     }
     
     private ProductEntity toEntity(Product p) { 
@@ -45,7 +43,7 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     }
 
     @Override
-	public Optional<Product> findById(UUID id) {
+	public Optional<Product> findById(Long id) {
 		return productRepo.findById(id).map(this::toDomain);
 	}
 	
@@ -55,5 +53,5 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
 		return productRepo.findAll().stream().map(this::toDomain).collect(Collectors.toList());
 	}
 	
-    @Override public void delete(UUID id){ productRepo.deleteById(id); }
+    @Override public void delete(Long id){ productRepo.deleteById(id); }
 }

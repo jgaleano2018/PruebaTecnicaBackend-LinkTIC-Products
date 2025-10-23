@@ -1,19 +1,16 @@
 package com.linkTIC.products.domain.model.payload;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 public class ProductResponse {
-    private UUID id;
+    private Long id;
 	private String nombre;
-	private BigDecimal precio;
+	private Double precio;
 	private String descripcion;
-	public UUID getId() {
+	public Long getId() {
 		return id;
 	}
 
 
-	public void setId(UUID id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public String getNombre() {
@@ -22,10 +19,10 @@ public class ProductResponse {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-	public BigDecimal getPrecio() {
+	public Double getPrecio() {
 		return precio;
 	}
-	public void setPrecio(BigDecimal precio) {
+	public void setPrecio(Double precio) {
 		this.precio = precio;
 	}
 	public String getDescripcion() {

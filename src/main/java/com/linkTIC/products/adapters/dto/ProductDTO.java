@@ -1,20 +1,16 @@
 package com.linkTIC.products.adapters.dto;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
-
 public class ProductDTO {
 
-	private UUID id; // matches id_product INT
+	private Long id; // matches id_product INT
 	private String nombre;
-	private BigDecimal precio;
+	private Double precio;
 	private String descripcion;
 	
 	public ProductDTO() {}
 	
 	
-	public ProductDTO(UUID id, String nombre, BigDecimal precio, String descripcion) {
+	public ProductDTO(Long id, String nombre, Double precio, String descripcion) {
 		this.setId(id);
 		this.setNombre(nombre);
 		this.setPrecio(precio);
@@ -22,12 +18,12 @@ public class ProductDTO {
 	}
 	
 	
-	public UUID getId() {
+	public Long getId() {
 		return id;
 	}
 	
 	
-	public void setId(UUID id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	
@@ -42,12 +38,12 @@ public class ProductDTO {
 	}
 	
 	
-	public BigDecimal getPrecio() {
+	public Double getPrecio() {
 		return precio;
 	}
 	
 	
-	public void setPrecio(BigDecimal precio) {
+	public void setPrecio(Double precio) {
 		this.precio = precio;
 	}
 	

@@ -1,8 +1,9 @@
 package com.linkTIC.products.application.service;
 
 import java.util.List;
-import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,42 +13,64 @@ import com.linkTIC.products.domain.port.out.ProductRepositoryPort;
 
 @Service
 public class ProductService implements ProductUseCases {
+	
     private final ProductRepositoryPort repository;
-
+    private final Logger log = LoggerFactory.getLogger(ProductService.class);
+    
     public ProductService(ProductRepositoryPort repository){
         this.repository = repository;
     }
 
     @Override
     @Transactional
-    public Product create(Product product){
-        // add domain validations here
+    public Product create(Product Product){
+    	
+    	Product saved;
     	
     	try {
     		
-    		this.repository.save(product);
+    		this.repository.save(Product);
+    		
+    		saved = this.repository.save(Product);
+    		
+    		log.info("Created Product id={} product_id={}", saved.getId(), saved.getId());
+    		
+    		return saved;
     		
 		
 	    } catch (Exception e) {
 	    	
-	        throw new IllegalArgumentException("Error: "+e.getMessage());
+	    	log.warn("Attempt to create Product id={}", Product.getId());
+	        throw new EntityNotFoundException("Error: "+e.getMessage());
 	    }
-    	
-        return product;
     }
 
     @Override
     @Transactional
-    public Product update(UUID id, Product product){
-    	Product existing = repository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+    public Product update(Long id, Product Product){
     	
-    	this.repository.save(existing);
-    	    	
-        return product;
+    	Product existing;
+    	Product saved;
+    	
+    	try {
+	    	existing = repository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+	    	
+	    	saved = this.repository.save(existing);
+	    	
+	    	log.info("Updated Product id={}", id);
+	    	
+	    	return saved;
+    	  
+	    } catch (Exception e) {
+	    	
+	    	log.warn("Attempt to update Product id={}", Product.getId());
+	        throw new EntityNotFoundException("Error: "+e.getMessage());
+	    }
+    	
     }
 
     @Override
-    public Product getById(UUID id){
+    public Product getById(Long id){
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
     }
 
@@ -58,7 +81,16 @@ public class ProductService implements ProductUseCases {
 
     @Override
     @Transactional
-    public void delete(UUID id){
-        repository.delete(id);
+    public void delete(Long id){
+    	
+    	try {
+    		
+    		repository.delete(id);
+    		
+    	} catch (Exception e) {
+	    	
+	    	log.warn("Attempt to delete Product id={}", id);
+	        throw new EntityNotFoundException("Error: "+e.getMessage());
+	    }
     }
 }

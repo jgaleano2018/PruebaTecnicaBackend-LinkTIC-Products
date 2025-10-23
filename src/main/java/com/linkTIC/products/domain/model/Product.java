@@ -1,12 +1,9 @@
 package com.linkTIC.products.domain.model;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 public class Product {
-	private UUID id; // matches id_colaborador INT
+	private Long id; // matches id_colaborador INT
 	private String nombre;
-	private BigDecimal precio;
+	private Double precio;
 	private String descripcion;
 	
 	// constructors, getters, setters
@@ -15,7 +12,7 @@ public class Product {
 	public Product() {}
 	
 	
-	public Product(UUID id, String nombre, BigDecimal precio, String descripcion) {
+	public Product(Long id, String nombre, Double precio, String descripcion) {
 		this.setId(id);
 		this.setNombre(nombre);
 		this.setPrecio(precio);
@@ -23,12 +20,12 @@ public class Product {
 	}
 
 
-	public UUID getId() {
+	public Long getId() {
 		return id;
 	}
 
 
-	public void setId(UUID id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -43,12 +40,12 @@ public class Product {
 	}
 
 
-	public BigDecimal getPrecio() {
+	public Double getPrecio() {
 		return precio;
 	}
 
 
-	public void setPrecio(BigDecimal precio) {
+	public void setPrecio(Double precio) {
 		this.precio = precio;
 	}
 

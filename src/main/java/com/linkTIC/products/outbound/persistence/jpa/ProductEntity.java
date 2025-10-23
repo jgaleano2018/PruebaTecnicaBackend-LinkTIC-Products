@@ -1,8 +1,5 @@
 package com.linkTIC.products.outbound.persistence.jpa;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -10,19 +7,23 @@ import jakarta.persistence.*;
 public class ProductEntity {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;	
 	
-	private UUID id; // matches id_colaborador INT
+	@Column(nullable=false)
 	private String nombre;
-	private BigDecimal precio;
+	
+	@Column(nullable=false)
+	private Double precio;
+	
+	@Column(nullable=false)
 	private String descripcion;
 	
 	
-	public UUID getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(UUID id) {
+	public void setId(Long id) {
 		this.id = id;
 	}	
 	public String getNombre() {
@@ -31,10 +32,10 @@ public class ProductEntity {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-	public BigDecimal getPrecio() {
+	public Double getPrecio() {
 		return precio;
 	}
-	public void setPrecio(BigDecimal precio) {
+	public void setPrecio(Double precio) {
 		this.precio = precio;
 	}
 	public String getDescripcion() {
