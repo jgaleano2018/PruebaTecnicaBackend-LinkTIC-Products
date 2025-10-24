@@ -6,17 +6,18 @@ public class ProductDTO {
 	private String nombre;
 	private Double precio;
 	private String descripcion;
+	private int cantidad;
 	
 	public ProductDTO() {}
 	
 	
-	public ProductDTO(Long id, String nombre, Double precio, String descripcion) {
+	public ProductDTO(Long id, String nombre, Double precio, String descripcion, int cantidad) {
 		this.setId(id);
 		this.setNombre(nombre);
 		this.setPrecio(precio);
 		this.setDescripcion(descripcion);
+		this.setCantidad(cantidad);
 	}
-	
 	
 	public Long getId() {
 		return id;
@@ -55,6 +56,16 @@ public class ProductDTO {
 	
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
+	}
+
+
+	public int getCantidad() {
+		return cantidad;
+	}
+
+
+	public void setCantidad(int cantidad) {
+		this.cantidad = cantidad;
 	}
 
 

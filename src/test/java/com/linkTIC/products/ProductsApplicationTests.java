@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.linkTIC.products.adapters.dto.ProductDTO;
 import com.linkTIC.products.adapters.inbound.rest.ProductController;
+import com.linkTIC.products.adapters.mapper.ProductMapper;
 import com.linkTIC.products.application.service.ProductService;
 import com.linkTIC.products.domain.model.Product;
 
@@ -41,25 +43,28 @@ class ProductApplicationTests {
     
     @Test
     void shouldSaveProduct() {
-        Product Product = new Product(1L, "Product01", 2500.555, "Product01");
-        when(service.create(Product)).thenReturn(Product);
+    	
+    	ProductDTO product = new ProductDTO(1L, "Product01", 2500.555, "Product01", 100);
+    	Product productDomain = ProductMapper.toDomain(product); 
+        when(service.create(product)).thenReturn(productDomain);
 
-        var saved = service.create(Product);
+        var saved = service.create(product);
 
         assertThat(saved).isNotNull();
-        verify(service).create(Product);
+        verify(service).create(product);
     }
     
     @Test
     void shouldUpdateProduct() {
-        Product Product = new Product(1L, "Product01", 2500.555, "Product01");
-        when(service.create(Product)).thenReturn(Product);
-        when(service.update(1234567890123456789L, Product)).thenReturn(Product);
+    	ProductDTO product = new ProductDTO(1L, "Product01", 2500.555, "Product01", 100);
+    	Product productDomain = ProductMapper.toDomain(product); 
+        when(service.create(product)).thenReturn(productDomain);
+        when(service.update(1234567890123456789L, productDomain)).thenReturn(productDomain);
 
-        var saved = service.update(1234567890123456789L, Product);
+        var saved = service.update(1234567890123456789L, productDomain);
 
         assertThat(saved).isNotNull();
-        verify(service).update(1234567890123456789L, Product);
+        verify(service).update(1234567890123456789L, productDomain);
     }
     
     @Test

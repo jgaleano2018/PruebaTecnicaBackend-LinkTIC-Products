@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.linkTIC.products.domain.model.Inventory;
 
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
@@ -35,5 +36,23 @@ public class InventoryClient {
                              .filter(ex -> ex instanceof IOException)
                              .onRetryExhaustedThrow((retryBackoffSpec, signal) -> signal.failure())
                 );
+    }
+    
+    public Mono<JsonNode> updateInventory(Inventory inventory) {
+        
+    	return webClient.put()
+                .uri("/api/inventory")
+                .bodyValue(inventory)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, 
+                        resp -> Mono.error(new RuntimeException("Client Error: " + resp.statusCode())))
+                .onStatus(HttpStatusCode::is5xxServerError, 
+                        resp -> Mono.error(new RuntimeException("Server Error: " + resp.statusCode())))
+                .bodyToMono(JsonNode.class)
+                .retryWhen(
+                      Retry.fixedDelay(3, Duration.ofSeconds(2))
+                           .filter(ex -> ex instanceof IOException)
+                           .onRetryExhaustedThrow((retryBackoffSpec, signal) -> signal.failure())
+              );
     }
 }
