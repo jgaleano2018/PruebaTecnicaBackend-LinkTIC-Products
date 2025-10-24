@@ -2,6 +2,7 @@ package com.linkTIC.products.application.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.linkTIC.products.adapters.dto.ProductDTO;
 import com.linkTIC.products.adapters.mapper.ProductMapper;
+import com.linkTIC.products.domain.model.Inventory;
 import com.linkTIC.products.domain.model.Product;
 import com.linkTIC.products.domain.port.in.ProductUseCases;
 import com.linkTIC.products.domain.port.out.ProductRepositoryPort;
@@ -38,8 +40,6 @@ public class ProductService implements ProductUseCases {
     		
     		productToDomain = ProductMapper.toDomain(product);
     		
-    		this.repository.save(productToDomain);
-    		
     		saved = this.repository.save(productToDomain);
     		
     		log.info("Created Product id={} product_id={}", saved.getId(), saved.getId());
@@ -48,7 +48,22 @@ public class ProductService implements ProductUseCases {
     		
     		
     		inventoryClient.checkInventory(productOptional.get().getId().toString())
-            .doOnError(ex -> log.warn("Error calling inventory: ", ex.getMessage()))
+            .doOnError(ex -> { log.warn("Error calling inventory: ", ex.getMessage());
+            		
+            		if (ex.getMessage() == "Error 500") {
+            			
+            			Inventory inventory = new Inventory(ThreadLocalRandom.current().nextLong(), saved.getId(), product.getCantidad());
+            			
+            			inventoryClient.createInventory(inventory)
+                        .doOnError(ex2 -> log.warn("Error calling inventory: ", ex.getMessage()))
+                        .subscribe(jsonInv -> {
+                            
+                            
+                            log.info("Created inventory id={} product_id={}", jsonInv.get("data").get("attributes").get("id").asLong(), saved.getId());
+                           
+                        });
+            		}
+            	})
             .subscribe(json -> {
                 int stockInventory = json.get("data").get("attributes").get("cantidad").asInt();
                 Long inventoryId = json.get("data").get("attributes").get("id").asLong();
@@ -62,7 +77,6 @@ public class ProductService implements ProductUseCases {
                 }
                 
             });
-    		
     		
     		
     		return saved;

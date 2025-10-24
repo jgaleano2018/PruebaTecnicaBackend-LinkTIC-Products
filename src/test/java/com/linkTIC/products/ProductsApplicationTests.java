@@ -3,12 +3,9 @@ package com.linkTIC.products;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import com.linkTIC.products.adapters.dto.ProductDTO;
-import com.linkTIC.products.adapters.inbound.rest.ProductController;
 import com.linkTIC.products.adapters.mapper.ProductMapper;
 import com.linkTIC.products.application.service.ProductService;
 import com.linkTIC.products.domain.model.Product;
@@ -20,14 +17,13 @@ import static org.mockito.Mockito.doNothing;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@WebMvcTest(ProductController.class)
 class ProductApplicationTests {
 
 	@Test
 	void contextLoads() {
 	}
 	
-	@Autowired
+	@Mock
     private ProductService service;
 
     @Test

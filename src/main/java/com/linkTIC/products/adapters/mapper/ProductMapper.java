@@ -32,7 +32,7 @@ public class ProductMapper {
     public static Product toDomain(ProductDTO dto) {
     	if (dto == null) return null;
     	Product p = new Product();
-    	p.setId(dto.getId());
+    	//p.setId(dto.getId());
     	p.setNombre(dto.getNombre());
     	p.setPrecio(dto.getPrecio());
     	p.setDescripcion(dto.getDescripcion());

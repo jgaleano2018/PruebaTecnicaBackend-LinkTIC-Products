@@ -15,7 +15,7 @@ import java.net.URI;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/Purchase")
+@RequestMapping("/api/purchase")
 @Tag(name = "Purchases", description = "Manage Purchases")
 @CrossOrigin(origins = "http://localhost:4200")
 public class PurchaseController {

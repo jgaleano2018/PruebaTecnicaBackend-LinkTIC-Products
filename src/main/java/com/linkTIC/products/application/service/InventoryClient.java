@@ -24,7 +24,7 @@ public class InventoryClient {
 
     public Mono<JsonNode> checkInventory(String productId) {
         return webClient.get()
-                .uri("/api/inventory/{id}", productId)
+                .uri("/api/inventory/product/{id}", productId)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, 
                           resp -> Mono.error(new RuntimeException("Client Error: " + resp.statusCode())))
@@ -36,6 +36,24 @@ public class InventoryClient {
                              .filter(ex -> ex instanceof IOException)
                              .onRetryExhaustedThrow((retryBackoffSpec, signal) -> signal.failure())
                 );
+    }
+    
+    public Mono<JsonNode> createInventory(Inventory inventory) {
+        
+    	return webClient.post()
+                .uri("/api/inventory")
+                .bodyValue(inventory)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, 
+                        resp -> Mono.error(new RuntimeException("Client Error: " + resp.statusCode())))
+                .onStatus(HttpStatusCode::is5xxServerError, 
+                        resp -> Mono.error(new RuntimeException("Server Error: " + resp.statusCode())))
+                .bodyToMono(JsonNode.class)
+                .retryWhen(
+                      Retry.fixedDelay(3, Duration.ofSeconds(2))
+                           .filter(ex -> ex instanceof IOException)
+                           .onRetryExhaustedThrow((retryBackoffSpec, signal) -> signal.failure())
+              );
     }
     
     public Mono<JsonNode> updateInventory(Inventory inventory) {

@@ -16,7 +16,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/Product")
+@RequestMapping("/api/product")
 @Tag(name = "Products", description = "Manage products")
 @CrossOrigin(origins = "http://localhost:4200")
 public class ProductController {
@@ -35,7 +35,7 @@ public class ProductController {
     	ProductDTO createdResponse = ProductMapper.toDto(created);
     	
 	    return ResponseEntity
-	      .created(URI.create("/api/Product/" + createdResponse.getId()))
+	      .created(URI.create("/api/product/" + createdResponse.getId()))
 	      .body(createdResponse);
         
     }
