@@ -29,12 +29,18 @@ public class PurchaseController {
     @PostMapping
     @Operation(summary = "Create Purchase by ID", description = "Returns a single Purchase")
     public ResponseEntity<PurchaseDTO> create(@Valid @RequestBody PurchaseDTO purchase){
+    	
+    	System.out.println("BeforEEEE saving purcahseesss....");
             	
     	Purchase created = purchaseService.create(PurchaseMapper.toDomain(purchase));
+    	
+    	System.out.println("After saving purcahseesss....");
+    	
+    	
     	PurchaseDTO createdResponse = PurchaseMapper.toDto(created);
     	
 	    return ResponseEntity
-	      .created(URI.create("/api/Purchase/" + createdResponse.getId()))
+	      .created(URI.create("/api/purchase/" + createdResponse.getId()))
 	      .body(createdResponse);
         
     }

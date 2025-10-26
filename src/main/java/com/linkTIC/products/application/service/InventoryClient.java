@@ -49,6 +49,7 @@ public class InventoryClient {
                 .onStatus(HttpStatusCode::is5xxServerError, 
                         resp -> Mono.error(new RuntimeException("Server Error: " + resp.statusCode())))
                 .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(10))
                 .retryWhen(
                       Retry.fixedDelay(3, Duration.ofSeconds(2))
                            .filter(ex -> ex instanceof IOException)
@@ -59,7 +60,7 @@ public class InventoryClient {
     public Mono<JsonNode> updateInventory(Inventory inventory) {
         
     	return webClient.put()
-                .uri("/api/inventory")
+                .uri("/api/inventory/"+inventory.getId())
                 .bodyValue(inventory)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, 
@@ -67,6 +68,7 @@ public class InventoryClient {
                 .onStatus(HttpStatusCode::is5xxServerError, 
                         resp -> Mono.error(new RuntimeException("Server Error: " + resp.statusCode())))
                 .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(10))
                 .retryWhen(
                       Retry.fixedDelay(3, Duration.ofSeconds(2))
                            .filter(ex -> ex instanceof IOException)

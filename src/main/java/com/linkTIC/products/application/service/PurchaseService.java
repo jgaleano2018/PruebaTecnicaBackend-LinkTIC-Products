@@ -2,7 +2,6 @@ package com.linkTIC.products.application.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,60 +35,71 @@ public class PurchaseService implements PurchaseUseCases {
     public Purchase create(Purchase purchase){
     	
     	Purchase saved;
-    	Purchase saved2 = new Purchase(0L, purchase.getIdProduct(), purchase.getTotalPurchase(), purchase.getCreatedAt(), purchase.getUpdatedAt());
     	
+    	if (purchase == null) {
+    		throw new IllegalArgumentException("Purchase to create cannot be null");
+        }
     	
-    	Purchase purchaseToDomain = purchase;
-    	Optional<com.linkTIC.products.domain.model.Purchase> purchaseOptional = java.util.Optional.empty();    	
-    	    	
     	try {
     		
+    		Optional<Product> product = productRepository.findById(purchase.getIdProduct());
     		
-    		Optional<Product> product = productRepository.findById(purchaseOptional.get().getIdProduct());
-    		
+    		saved = this.repository.save(purchase);
     		
     		if (product != null) {
-    			
-    			saved = this.repository.save(purchaseToDomain);
     		
-	    		inventoryClient.checkInventory(purchaseOptional.get().getIdProduct().toString())
+	    		inventoryClient.checkInventory(purchase.getIdProduct().toString())
 	            .doOnError(ex -> log.warn("Error calling purchase: ", ex.getMessage()))
 	            .subscribe(json -> {
-	                int stockInventory = json.get("data").get("attributes").get("cantidad").asInt();
-	                Long inventoryId = json.get("data").get("attributes").get("id").asLong();
-	                int stockAvailable = stockInventory-purchase.getTotalPurchase();
+	            	
+	                try {
+
+	                    Long inventoryId = json.get("id").asLong();
+	                	int stockInventory = json.get("cantidad").asInt();
+	                	int stockAvailable = stockInventory-purchase.getTotalPurchase();
+	                                    	
+		                if (stockAvailable <= 0) {
+		                	
+		                	log.warn("Error Insufficient inventory - Product id={}", purchase.getIdProduct().toString());
+		                	
+		                	Purchase existing = repository.findById(saved.getId()).orElseThrow(() -> new RuntimeException("Not found"));
+		                	
+		                	existing.setTotalPurchase(existing.getTotalPurchase() - purchase.getTotalPurchase());        	    	
+		        	    	this.repository.save(existing);
+		                }
+		                else {
+		                	
+		                	
+		                	log.info("Created Purchase id={} product_id={}", saved.getId(), purchase.getIdProduct());
+		                	
+		                	Inventory inventory = new Inventory();		                	
+		                	inventory.setId(inventoryId);
+		                	inventory.setProducto_id(purchase.getIdProduct());
+		                	inventory.setCantidad(stockAvailable);		                	
+		                	
+		                	inventoryClient.updateInventory(inventory)
+		                    .doOnError(ex -> log.warn("Error calling purchase: ", ex.getMessage()))
+		                    .subscribe(jsonInv -> {
+		                        int stockInventoryInv = jsonInv.get("cantidad").asInt();                        
+		                        int stockAvailableInv = stockInventoryInv-purchase.getTotalPurchase();
+		                        
+		                        if (stockAvailable == stockAvailableInv) {
+		                        	log.info("Inventory Product id={} Inventory id={}",  saved.getId(), inventoryId);
+		                        }
+		                        else {
+		                        	
+		                        	//Emmit event
+		                        	
+		                        	log.info("Inventory Changed Product id={} Inventory id={}",  saved.getId(), inventoryId);
+		                        	
+		                        }
+		                       
+		                    });
+		                	
+		                }
 	                
-	                if (stockAvailable <= 0) {
-	                	log.warn("Error Insufficient inventory - Product id={}", purchaseOptional.get().getIdProduct().toString());
-	                	
-	                	Purchase existing = repository.findById(saved.getId()).orElseThrow(() -> new RuntimeException("Not found"));
-	                	
-	                	existing.setTotalPurchase(existing.getTotalPurchase() - purchase.getTotalPurchase());        	    	
-	        	    	this.repository.save(existing);
 	                }
-	                else {
-	                	
-	                	
-	                	log.info("Created Purchase id={} product_id={}", purchase.getId(), purchase.getIdProduct());
-	                	
-	                	Inventory inventory = new Inventory(ThreadLocalRandom.current().nextLong(), purchase.getIdProduct(), stockAvailable);
-	                	
-	                	inventoryClient.updateInventory(inventory)
-	                    .doOnError(ex -> log.warn("Error calling purchase: ", ex.getMessage()))
-	                    .subscribe(jsonInv -> {
-	                        int stockInventoryInv = jsonInv.get("data").get("attributes").get("cantidad").asInt();                        
-	                        int stockAvailableInv = stockInventoryInv-purchase.getTotalPurchase();
-	                        
-	                        if (stockAvailable == stockAvailableInv) {
-	                        	log.info("Inventory Product id={} Inventory id={}",  purchaseOptional.get().getId(), inventoryId);
-	                        }
-	                        else {
-	                        	
-	                        	//Emmit event
-	                        	
-	                        }
-	                       
-	                    });
+	                catch(Exception e) {
 	                	
 	                }
 	                
@@ -98,16 +108,16 @@ public class PurchaseService implements PurchaseUseCases {
     		}
     		else {
     			
-    			log.warn("Error Product Inexistent - Product id={}", purchaseOptional.get().getIdProduct().toString());
+    			log.warn("Error Product Inexistent - Product id={}", purchase.getIdProduct().toString());
     		}
     		
-    		return saved2;
+    		return saved;
     		
 		
 	    } catch (Exception e) {
 	    	
 	    	log.warn("Attempt to create Product id={}", purchase.getIdProduct());
-	        throw new EntityNotFoundException("Error: "+e.getMessage());
+	        throw new IllegalArgumentException("Error: "+e.getMessage());
 	    }
     }
     

@@ -24,8 +24,8 @@ public class WebClientConfig {
                 //.defaultHeaders(headers -> headers.setBasicAuth("product-service", "secret-password"))
                 .clientConnector(new ReactorClientHttpConnector(
                         HttpClient.create()
-                                  .responseTimeout(Duration.ofSeconds(5))
-                                  .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+                                  .responseTimeout(Duration.ofSeconds(10))
+                                  .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 ))
                 .build();
     }

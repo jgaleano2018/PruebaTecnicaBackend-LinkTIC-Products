@@ -2,7 +2,6 @@ package com.linkTIC.products.application.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,44 +35,65 @@ public class ProductService implements ProductUseCases {
     	Product productToDomain;
     	Optional<com.linkTIC.products.domain.model.Product> productOptional;
     	
+    	if (product == null) {
+    		throw new IllegalArgumentException("Product to create cannot be null");
+        }
+    	
     	try {
     		
     		productToDomain = ProductMapper.toDomain(product);
     		
     		saved = this.repository.save(productToDomain);
     		
-    		log.info("Created Product id={} product_id={}", saved.getId(), saved.getId());
+    		log.info("Created Product id={}", saved.getId());
     		
     		productOptional = repository.findById(saved.getId());
     		
     		
     		inventoryClient.checkInventory(productOptional.get().getId().toString())
-            .doOnError(ex -> { log.warn("Error calling inventory: ", ex.getMessage());
-            		
-            		if (ex.getMessage() == "Error 500") {
-            			
-            			Inventory inventory = new Inventory(ThreadLocalRandom.current().nextLong(), saved.getId(), product.getCantidad());
-            			
-            			inventoryClient.createInventory(inventory)
-                        .doOnError(ex2 -> log.warn("Error calling inventory: ", ex.getMessage()))
-                        .subscribe(jsonInv -> {
-                            
-                            
-                            log.info("Created inventory id={} product_id={}", jsonInv.get("data").get("attributes").get("id").asLong(), saved.getId());
-                           
-                        });
-            		}
-            	})
+            .doOnError(ex -> log.warn("Error calling inventory: ", ex.getMessage()))
             .subscribe(json -> {
-                int stockInventory = json.get("data").get("attributes").get("cantidad").asInt();
-                Long inventoryId = json.get("data").get("attributes").get("id").asLong();
-                //System.out.println("Stock available: " + available);
+            	
+            	System.out.println("Compact JSON:\n" + json);
+            	
+            	int stockInventory = 0;
+                Long inventoryId = (long) 0;
                 
-                if (stockInventory == 0) {
-                	log.warn("Error Insufficient inventory - Product id={}", productOptional.get().getId().toString());
+                try {
+
+                    inventoryId = json.get("id").asLong();
+                	stockInventory = json.get("cantidad").asInt();
+                                    	
+                }
+                catch(Exception e) {
+                	
+                }
+                
+                log.info("Inventory My Value =>>> Inventory id={}", inventoryId);
+                
+                if (inventoryId != 0) {
+	                if (stockInventory == 0) {
+	                	
+	                	log.warn("Error Insufficient inventory - Product id={}", productOptional.get().getId().toString());
+	                }
+	                else {
+	                	
+	                	log.info("Inventory Product id={} Inventory id={}",  productOptional.get().getId(), inventoryId);
+	                }
                 }
                 else {
-                	log.info("Inventory Product id={} Inventory id={}",  productOptional.get().getId(), inventoryId);
+        			
+                	Inventory inventory = new Inventory();                	
+                	inventory.setProducto_id(saved.getId());
+                	inventory.setCantidad(product.getCantidad());
+                	
+        			inventoryClient.createInventory(inventory)
+                    .doOnError(ex2 -> log.warn("Error calling inventory: ", ex2.getMessage()))
+                    .subscribe(jsonInv -> {                        
+                        
+                        log.info("Created inventory id={} product_id={}", jsonInv.get("id").asLong(), saved.getId());
+                       
+                    });
                 }
                 
             });
@@ -85,16 +105,20 @@ public class ProductService implements ProductUseCases {
 	    } catch (Exception e) {
 	    	
 	    	log.warn("Attempt to create Product id={}", product.getNombre());
-	        throw new EntityNotFoundException("Error: "+e.getMessage());
+	        throw new IllegalArgumentException("Error: "+e.getMessage());
 	    }
     }
 
     @Override
     @Transactional
-    public Product update(Long id, Product Product){
+    public Product update(Long id, Product product){
     	
     	Product existing;
     	Product saved;
+    	
+    	if (product == null) {
+    		throw new IllegalArgumentException("Product to update cannot be null");
+        }
     	
     	try {
 	    	existing = repository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
@@ -107,8 +131,8 @@ public class ProductService implements ProductUseCases {
     	  
 	    } catch (Exception e) {
 	    	
-	    	log.warn("Attempt to update Product id={}", Product.getId());
-	        throw new EntityNotFoundException("Error: "+e.getMessage());
+	    	log.warn("Attempt to update Product id={}", product.getId());
+	        throw new IllegalArgumentException("Error: "+e.getMessage());
 	    }
     	
     }
@@ -134,7 +158,7 @@ public class ProductService implements ProductUseCases {
     	} catch (Exception e) {
 	    	
 	    	log.warn("Attempt to delete Product id={}", id);
-	        throw new EntityNotFoundException("Error: "+e.getMessage());
+	        throw new IllegalArgumentException("Error: "+e.getMessage());
 	    }
     }
     
