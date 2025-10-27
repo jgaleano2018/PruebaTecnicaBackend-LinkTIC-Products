@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "Strong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+  app:
+    build: .
+    container_name: springboot-app
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://localhost:1433;databaseName=inventoryDB;encrypt=true;trustServerCertificate=true;
+      SPRING_DATASOURCE_USERNAME: linktic
+      SPRING_DATASOURCE_PASSWORD: linktic2025
+    depends_on:
+      - sqlserver
+volumes:
+  sql_data:
