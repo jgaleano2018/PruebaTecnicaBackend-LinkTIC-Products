@@ -19,6 +19,9 @@ target/
 *.iml
 *.ipr
 
+# Logs
+*.log
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -31,3 +34,17 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+*.seed
+*.tar
+*.bak
+.env
+
+# Tests
+/test-output/
